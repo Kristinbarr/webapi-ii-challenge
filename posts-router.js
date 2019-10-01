@@ -41,7 +41,7 @@ router.get('/:id', (req, res) => {
 
 // GET - return comments from a post's id
 router.get('/:id/comments', (req, res) => {
-  // findCommentById - accepts an id, returns the comment associated w that id
+  // findCommentById() - accepts id, returns comment associated with id
   db.findCommentById(req.params.id)
     .then((comments) => {
       if (comments) {
@@ -56,6 +56,25 @@ router.get('/:id/comments', (req, res) => {
       res
         .status(500)
         .json({ error: 'The post information could not be retrieved.' })
+    })
+})
+
+// POST - create a new post
+router.post('/', (req, res) => {
+  // insert(): accepts a post object and adds it to the database. returns object with id of inserted post. Object example: { id: 123 }
+  if (!req.body.title || !req.body.contents) {
+    return res
+      .status(400)
+      .json({ errorMessage: 'Please provide title and contents for the post.' })
+  }
+  db.insert(req.body) // give the fn the object post
+    .then((post) => {
+      res.status(201).json(post)
+    })
+    .catch((error) => {
+      res.status(500).json({
+        error: 'There was an error while saving the post to the database'
+      })
     })
 })
 
