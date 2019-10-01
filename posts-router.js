@@ -21,16 +21,41 @@ router.get('/', (req, res) => {
 router.get('/:id', (req, res) => {
   db.findById(req.params.id)
     .then((post) => {
-      if (post) { // if post from id is found, return 200 and post
+      if (post) {
+        // if post from id is found, return 200 and post
         res.status(200).json(post)
-      } else { // if post from id NOT found, return 404 and message
+      } else {
+        // if post from id NOT found, return 404 and message
         res
           .status(404)
           .json({ message: 'The post with the specified ID does not exist' })
       }
     })
-    .catch((error) => { // if db cannot find post, return 500 and error msg
-      res.status(500).json({ message: 'Error retrieving post' })
+    .catch((error) => {
+      // if db cannot find post, return 500 and error msg
+      res
+        .status(500)
+        .json({ error: 'The post information could not be retrieved.' })
+    })
+})
+
+// GET - return comments from a post's id
+router.get('/:id/comments', (req, res) => {
+  // findCommentById - accepts an id, returns the comment associated w that id
+  db.findCommentById(req.params.id)
+    .then((comments) => {
+      if (comments) {
+        res.status(200).json(comments)
+      } else {
+        res
+          .status(404)
+          .json({ message: 'The post with the specified ID does not exist.' })
+      }
+    })
+    .catch((error) => {
+      res
+        .status(500)
+        .json({ error: 'The post information could not be retrieved.' })
     })
 })
 
