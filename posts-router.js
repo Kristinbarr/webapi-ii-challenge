@@ -1,7 +1,10 @@
+// import express
 const express = require('express')
 
+// import database
 const db = require('./data/db')
 
+// spin up a router instance
 const router = express.Router()
 
 // GET - returns all posts in an array
@@ -83,7 +86,8 @@ router.post('/:id/comments', (req, res) => {
   // insertComment(): accepts comment object, adds it to database, returns object with the id of comment. The object ex: { id: 123 }.
   // This method will throw an error if the post_id field in the comment object does not match a valid post id in the database.
 
-  if (!req.body.text) { // checks for a request body
+  if (!req.body.text) {
+    // checks for a request body
     res
       .status(400) // BAD REQUEST
       .json({ errorMessage: 'Please provide text for the comment.' })
@@ -92,7 +96,8 @@ router.post('/:id/comments', (req, res) => {
     res
       .status(400) // BAD REQUEST
       .json({ message: 'The specified post ID does not match the request ID.' })
-  } else if (!db.findById(req.params.id)) { // checks if param id returns data
+  } else if (!db.findById(req.params.id)) {
+    // checks if param id returns data
     res
       .status(404) // NOT FOUND
       .json({ message: 'The post with the specified ID does not exist.' })
@@ -102,11 +107,43 @@ router.post('/:id/comments', (req, res) => {
         res.status(201).json(newComment) // 201 CREATED
       })
       .catch((error) => {
-        res.status(500).json({ // SERVER ERROR
+        res.status(500).json({
+          // SERVER ERROR
           error: 'There was an error while saving the post to the database'
         })
       })
   }
+})
+
+// PUT - update an existing post by id and body
+router.put('/:id', (req, res) => {
+  // deconstructing the req.body and a variable just for title and contents
+  const { title, contents } = req.body
+  const changes = { title, contents }
+
+  // if title or contents don't exist, enter this conditional
+  if (!title || !contents) {
+    res
+    .status(400) // BAD REQUEST
+    .json({ errorMessage: 'Please provide title and contents for the post.' })
+  }
+
+  // update(): accepts 2 arguments, id and object with changes. returns count of updated records. count of 1 means it was successful.
+  db.update(req.params.id, changes)
+    .then((count) => {
+      if (count == 1) {
+        res.status(200).json(changes)
+      } else {
+        res
+          .status(404) // NOT FOUND
+          .json({ message: 'The post with the specific ID does not exist.' })
+      }
+    })
+    .catch((error) => {
+      res
+        .status(500) // SERVER ERROR
+        .json({ error: 'The post information could not be modified.' })
+    })
 })
 
 module.exports = router
