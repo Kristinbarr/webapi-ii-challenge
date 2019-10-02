@@ -124,8 +124,8 @@ router.put('/:id', (req, res) => {
   // if title or contents don't exist, enter this conditional
   if (!title || !contents) {
     res
-    .status(400) // BAD REQUEST
-    .json({ errorMessage: 'Please provide title and contents for the post.' })
+      .status(400) // BAD REQUEST
+      .json({ errorMessage: 'Please provide title and contents for the post.' })
   }
 
   // update(): accepts 2 arguments, id and object with changes. returns count of updated records. count of 1 means it was successful.
@@ -143,6 +143,24 @@ router.put('/:id', (req, res) => {
       res
         .status(500) // SERVER ERROR
         .json({ error: 'The post information could not be modified.' })
+    })
+})
+
+router.delete('/:id', (req, res) => {
+
+  // remove(): accepts id arg. if successful, returns number of deleted posts
+  db.remove(req.params.id)
+    .then((remainingCount) => {
+      if (!req.params.id) {
+        res
+          .status(404)
+          .json({ message: 'The post with the specific ID does not exist.' })
+      } else {
+        res.status(204).json(remainingCount)
+      }
+    })
+    .catch((error) => {
+      res.status(500).json({ error: 'The post could not be removed.' })
     })
 })
 
