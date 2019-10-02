@@ -78,4 +78,30 @@ router.post('/', (req, res) => {
     })
 })
 
+// POST - create a comment for an existing post with id
+router.post('/:id/comments', (req, res) => {
+  // insertComment(): accepts comment object, adds it to database, returns object with the id of comment. The object ex: { id: 123 }.
+  // This method will throw an error if the post_id field in the comment object does not match a valid post id in the database.
+
+  if (!req.body.text) { // checks for a request body
+    res
+      .status(404)
+      .json({ errorMessage: 'Please provide text for the comment.' })
+  } else if (!db.findById(req.params.id)) { // checks if param id returns data
+    res
+      .status(404)
+      .json({ message: 'The post with the specified ID does not exist.' })
+  } else {
+    db.insertComment(req.body) // saves comment to db, returns the new comment
+      .then((newComment) => {
+        res.status(201).json(newComment)
+      })
+      .catch((error) => {
+        res.status(500).json({
+          error: 'There was an error while saving the post to the database'
+        })
+      })
+  }
+})
+
 module.exports = router
