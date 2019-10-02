@@ -42,7 +42,7 @@ router.get('/:id', (req, res) => {
 // GET - return comments from a post's id
 router.get('/:id/comments', (req, res) => {
   // findCommentById() - accepts id, returns comment associated with id
-  db.findCommentById(req.params.id)
+  db.findPostComments(req.params.id)
     .then((comments) => {
       if (comments) {
         res.status(200).json(comments)
