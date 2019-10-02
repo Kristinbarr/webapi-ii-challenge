@@ -85,19 +85,24 @@ router.post('/:id/comments', (req, res) => {
 
   if (!req.body.text) { // checks for a request body
     res
-      .status(404)
+      .status(400) // BAD REQUEST
       .json({ errorMessage: 'Please provide text for the comment.' })
+  } else if (req.body.post_id !== Number(req.params.id)) {
+    // checks if postid in body matches param id
+    res
+      .status(400) // BAD REQUEST
+      .json({ message: 'The specified post ID does not match the request ID.' })
   } else if (!db.findById(req.params.id)) { // checks if param id returns data
     res
-      .status(404)
+      .status(404) // NOT FOUND
       .json({ message: 'The post with the specified ID does not exist.' })
   } else {
     db.insertComment(req.body) // saves comment to db, returns the new comment
       .then((newComment) => {
-        res.status(201).json(newComment)
+        res.status(201).json(newComment) // 201 CREATED
       })
       .catch((error) => {
-        res.status(500).json({
+        res.status(500).json({ // SERVER ERROR
           error: 'There was an error while saving the post to the database'
         })
       })
