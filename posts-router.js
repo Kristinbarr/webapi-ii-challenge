@@ -108,7 +108,6 @@ router.post('/:id/comments', (req, res) => {
       })
       .catch((error) => {
         res.status(500).json({
-          // SERVER ERROR
           error: 'There was an error while saving the post to the database'
         })
       })
@@ -146,22 +145,25 @@ router.put('/:id', (req, res) => {
     })
 })
 
-router.delete('/:id', (req, res) => {
+// DELETE - delete a post by id passed in
+router.delete('/:id', async (req, res) => {
+  const id = req.params.id
 
-  // remove(): accepts id arg. if successful, returns number of deleted posts
-  db.remove(req.params.id)
-    .then((remainingCount) => {
-      if (!req.params.id) {
-        res
-          .status(404)
-          .json({ message: 'The post with the specific ID does not exist.' })
-      } else {
-        res.status(204).json(remainingCount)
+  try {
+    const [post] = await db.findById(id)
+    if (post) {
+      const deleted = await db.remove(id)
+      if (deleted) {
+        res.status(200).json(post) // NO CONTENT
       }
-    })
-    .catch((error) => {
-      res.status(500).json({ error: 'The post could not be removed.' })
-    })
+    } else {
+      res.status(404).json({
+        message: 'The post with the specific ID does not exist.'
+      })
+    }
+  } catch (error) {
+    res.status(400).json({ error: 'The post could not be removed' })
+  }
 })
 
 module.exports = router
